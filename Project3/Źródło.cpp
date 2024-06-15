@@ -48,7 +48,8 @@ void show_task() {
         // Loop through the result set and display data
         int count = 0;
         while (res->next()) {
-            cout << "Task " << ++count << ": " << res->getString("task") << endl;
+            cout << "Task " << ++count << ": " << res->getString("task");
+            cout << " " << res->getString("done") << endl;
         }
 
         delete res;
@@ -86,15 +87,16 @@ void add_task() {
         string createTableSQL =
             "CREATE TABLE IF NOT EXISTS TODO ("
             "id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
-            "task VARCHAR(255) NOT NULL"
+            "task VARCHAR(255) NOT NULL,"
+            "done BOOL NOT NULL"
             ")";
 
         stmt->execute(createTableSQL);
 
         // SQL query to insert data into the table
         string insertDataSQL =
-            "INSERT INTO TODO (task) VALUES "
-            "('"+t1.name+"')";
+            "INSERT INTO TODO (task, done) VALUES "
+            "('" + t1.name + "', " + (t1.done ? "1" : "0") + ")";
         
         stmt->execute(insertDataSQL);
 
