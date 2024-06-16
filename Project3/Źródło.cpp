@@ -6,68 +6,89 @@
 #include <mysql_driver.h>
 #include "Task.h"
 using namespace std;
-void add_task();
-void show_task();
-void menu() {
-    int wybor;
-    do {
+void add_task(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con);
+void show_task(sql::Statement* stmt, sql::Connection* con);
 
-        cout << "What would you like to do?\n1. Show me my task\n2. Add new task" << endl;
+// Menu nawigacyjne 
+void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
+
+    int wybor;
+
+    // Zmienna do sprawdzania czy u¿ytkowanik wybra³ odpowiednie opcje dostêpne w menu
+    int wykonane=0;
+
+    // Pêtla do zapytania u¿ytkownika co chce wykonaæ 
+    do {
+        cout << "\nWhat would you like to do?\n1. Show me my task\n2. Add new task" << endl;
         cin >> wybor;
         if (wybor == 1) {
-            show_task();
+            wykonane = 1;
+            system("cls");
+            show_task(stmt, con);
+
         }
         else if (wybor == 2) {
-            add_task();
+            wykonane = 1;
+            system("cls");
+            add_task(res,stmt,con);
         }
-    } while (wybor != 1 & wybor != 2);
+    } while (wykonane==0);
 
 }
-void show_task() {
-    try {
-        sql::mysql::MySQL_Driver* driver;
-        sql::Connection* con;
+// Wyœwietlanie zadañ
+void show_task(sql::Statement* stmt, sql::Connection* con) {
 
-        driver = sql::mysql::get_mysql_driver_instance();
-        con = driver->connect("tcp://localhost:3306", "root", "root");
-
-        sql::Statement* stmt = con->createStatement();
-
-        // Create the database if it does not exist
-        stmt->execute("CREATE DATABASE IF NOT EXISTS todo");
-
-        // Use the database
-        con->setSchema("todo");
-
-
-        // SQL query to retrieve data from the table
+        // Ponowne zapytanie o pobranie danych (w razie gdyby u¿ytkowanik doda³ nowe zadanie)
         string selectDataSQL = "SELECT * FROM TODO";
-
         sql::ResultSet* res = stmt->executeQuery(selectDataSQL);
 
-        // Loop through the result set and display data
-        int count = 0;
-        while (res->next()) {
-            cout << "Task " << ++count << ": " << res->getString("task");
-            cout << " " << res->getString("done") << endl;
-        }
 
-        delete res;
-        delete stmt;
-        delete con;
-    }
-    catch (sql::SQLException& e) {
-        std::cerr << "SQL Error: " << e.what() << std::endl;
-    }
-    menu();
+        // Pobranie iloœci danych z tablicy aby sprawdziæ czy baza jest pusta
+        string countSQL = "SELECT COUNT(*) AS count FROM TODO";
+        sql::Statement* stmt1 = con->createStatement();
+        sql::ResultSet* res1 = stmt1->executeQuery(countSQL);
+        res1->next();
+        int ID_count = res1->getInt("count");
+        int count = 0;
+
+        // Sprawdzanie czy baza jest pusta
+        if (ID_count == 0) {
+            cout << "No tasks available." << endl;
+        }
+        else {
+            // Wyœwietlanie danych z bazy danych
+            while (res->next()) {
+                cout << "Task " << ++count << ": " << res->getString("task");
+                cout << " " << res->getString("done") << endl;
+            }
+        }
+            
+            
+        
+        
+    // Powrót do menu
+    menu(res,stmt,con);
 }
-void add_task() {
-    string task;
+
+// Dodawanie zadañ
+void add_task(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
+    string task_name;
     cout << "Enter your task: ";
-    cin >> task;
-    Task t1(task);
-    
-    
+    cin.ignore();
+    getline(cin, task_name);
+    Task t1(task_name);
+        // SQL query to insert data into the table
+        string insertDataSQL =
+            "INSERT INTO TODO (task, done) VALUES "
+            "('" + t1.name + "', " + (t1.done ? "1" : "0") + ")";
+        
+        stmt->execute(insertDataSQL);
+ 
+    menu(res, stmt,con);
+}
+
+int main() {
+    // Próba po³¹czenia siê do bazy danych
     try {
         sql::mysql::MySQL_Driver* driver;
         sql::Connection* con;
@@ -77,13 +98,13 @@ void add_task() {
 
         sql::Statement* stmt = con->createStatement();
 
-        // Create the database if it does not exist
+        // Tworzenie bazy jeœli ona nie istnieje
         stmt->execute("CREATE DATABASE IF NOT EXISTS todo");
 
-        // Use the database
+        // U¿ycie bazy danych
         con->setSchema("todo");
 
-        // SQL query to create a table
+        // Tworzenie tablicy
         string createTableSQL =
             "CREATE TABLE IF NOT EXISTS TODO ("
             "id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -93,25 +114,20 @@ void add_task() {
 
         stmt->execute(createTableSQL);
 
-        // SQL query to insert data into the table
-        string insertDataSQL =
-            "INSERT INTO TODO (task, done) VALUES "
-            "('" + t1.name + "', " + (t1.done ? "1" : "0") + ")";
-        
-        stmt->execute(insertDataSQL);
+        // Zapytanie SQL pobieraj¹ce dane z tabeli
+        string selectDataSQL = "SELECT * FROM TODO";
 
-        
+        sql::ResultSet* res = stmt->executeQuery(selectDataSQL);
+
+        menu(res,stmt, con);
+        // Usuwanie po³¹czenia
+        delete res;
         delete stmt;
         delete con;
     }
     catch (sql::SQLException& e) {
         std::cerr << "SQL Error: " << e.what() << std::endl;
     }
-    menu();
-}
-
-int main() {
     
-    menu();
     return 0;
 }

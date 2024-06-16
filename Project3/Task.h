@@ -10,5 +10,9 @@ public:
 	Task(string _name) {
 		name = _name;
 	}
-	friend void add_task();
+	string getName() const { return name; }
+	bool isDone() const { return done; }
+	void markDone() { done = true; }
+
+	friend void add_task(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con);
 };
