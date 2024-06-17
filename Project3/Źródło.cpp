@@ -6,8 +6,10 @@
 #include <mysql_driver.h>
 #include "Task.h"
 using namespace std;
-void add_task(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con);
+void get_task_from_user(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con);
 void show_task(sql::Statement* stmt, sql::Connection* con);
+void mark_task_done(sql::Statement* stmt, sql::Connection* con);
+void deleteTask(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con);
 
 // Menu nawigacyjne 
 void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
@@ -19,7 +21,7 @@ void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
 
     // Pêtla do zapytania u¿ytkownika co chce wykonaæ 
     do {
-        cout << "\nWhat would you like to do?\n1. Show me my task\n2. Add new task" << endl;
+        cout << "\nWhat would you like to do?\n1. Show me my task\n2. Add new task\n3. Mark task as done\n4. Delete task" << endl;
         cin >> wybor;
         if (wybor == 1) {
             wykonane = 1;
@@ -30,10 +32,36 @@ void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
         else if (wybor == 2) {
             wykonane = 1;
             system("cls");
-            add_task(res,stmt,con);
+            get_task_from_user(res,stmt,con);
+        }
+        else if (wybor == 3) {
+            wykonane = 1;
+            system("cls");
+            mark_task_done(stmt, con);
+        }
+        else if (wybor == 4) {
+            wykonane = 1;
+            system("cls");
+            deleteTask(res, stmt, con);
         }
     } while (wykonane==0);
 
+}
+void mark_task_done(sql::Statement* stmt, sql::Connection* con) {
+
+    // Ponowne zapytanie o pobranie danych (w razie gdyby u¿ytkowanik doda³ nowe zadanie)
+    string selectDataSQL = "SELECT * FROM TODO";
+    sql::ResultSet* res = stmt->executeQuery(selectDataSQL);
+
+    string taskName;
+    cout << "Enter your task you would like to mark as done: ";
+    cin.ignore();
+    getline(std::cin, taskName);
+    std::string updateSQL = "UPDATE TODO SET done = 1 WHERE task = '" + taskName + "'";
+    stmt->execute(updateSQL);
+
+    // Powrót do menu
+    menu(res, stmt, con);
 }
 // Wyœwietlanie zadañ
 void show_task(sql::Statement* stmt, sql::Connection* con) {
@@ -71,20 +99,24 @@ void show_task(sql::Statement* stmt, sql::Connection* con) {
 }
 
 // Dodawanie zadañ
-void add_task(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
+void get_task_from_user(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
     string task_name;
     cout << "Enter your task: ";
     cin.ignore();
     getline(cin, task_name);
     Task t1(task_name);
-        // SQL query to insert data into the table
-        string insertDataSQL =
-            "INSERT INTO TODO (task, done) VALUES "
-            "('" + t1.name + "', " + (t1.done ? "1" : "0") + ")";
-        
-        stmt->execute(insertDataSQL);
+    t1.add_task(res, stmt, con);
  
     menu(res, stmt,con);
+}
+void deleteTask(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
+    string taskName;
+    cout << "Enter your task you would like to mark as done: ";
+    cin.ignore();
+    getline(std::cin, taskName);
+    std::string deleteSQL = "DELETE FROM TODO WHERE task = '" + taskName + "'";
+    stmt->execute(deleteSQL);
+    menu(res, stmt, con);
 }
 
 int main() {

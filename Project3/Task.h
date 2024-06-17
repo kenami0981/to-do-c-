@@ -10,9 +10,15 @@ public:
 	Task(string _name) {
 		name = _name;
 	}
-	string getName() const { return name; }
-	bool isDone() const { return done; }
-	void markDone() { done = true; }
 
+
+	void add_task(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
+		string insertDataSQL =
+			"INSERT INTO TODO (task, done) VALUES "
+			"('" + name + "', " + (done ? "1" : "0") + ")";
+
+		stmt->execute(insertDataSQL);
+
+	};
 	friend void add_task(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con);
 };
