@@ -18,8 +18,18 @@ void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
 
     // Pêtla do zapytania u¿ytkownika co chce wykonaæ 
     do {
-        cout << "\nWhat would you like to do?\n1. Show me my task\n2. Add new task\n3. Mark task as done\n4. Delete task" << endl;
+        cout << endl;
+        cout << "   +----------------------------------------------------------------------------------+" << endl;
+        cout << "   |                                   MAIN MENU                                      |" << endl;
+        cout << "   +----------------------------------------------------------------------------------+" << endl;
+        cout << "   | 1. Show me my tasks                                                              |" << endl;
+        cout << "   | 2. Add new task                                                                  |" << endl;
+        cout << "   | 3. Mark task as done                                                             |" << endl;
+        cout << "   | 4. Delete task                                                                   |" << endl;
+        cout << "   +----------------------------------------------------------------------------------+" << endl;
+        cout << "   | Enter your choice (1-4): ";
         cin >> choice;
+        cout << "   +----------------------------------------------------------------------------------+" << endl;
         if (choice == "1") {
             wykonane = 1;
             system("cls");
@@ -34,12 +44,16 @@ void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
             system("cls");
             t0.show_tasks(stmt, con);
             t0.get_task_from_user(res, stmt, con);
+            system("cls");
+            t0.show_tasks(stmt, con);
             menu(res, stmt, con);
         }
         else if (choice == "3") {
             wykonane = 1;
             system("cls");
             t0.mark_task_done(stmt, con);
+            system("cls");
+            t0.show_tasks(stmt, con);
 
             // Powrót do menu
             menu(res, stmt, con);
@@ -48,6 +62,8 @@ void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
             wykonane = 1;
             system("cls");
             t0.deleteTask(stmt, con);
+            system("cls");
+            t0.show_tasks(stmt, con);
             menu(res, stmt, con);
         }
     } while (wykonane == 0);

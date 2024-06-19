@@ -6,6 +6,7 @@
 #include <iostream>
 #include <mysql_connection.h>
 #include <mysql_driver.h>
+#include<windows.h>  
 using namespace std;
 
 class Task {
