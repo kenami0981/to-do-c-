@@ -1,5 +1,11 @@
 #pragma once
 #include<iostream>
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/statement.h>
+#include <iostream>
+#include <mysql_connection.h>
+#include <mysql_driver.h>
 using namespace std;
 
 class Task {
@@ -11,40 +17,15 @@ public:
 		name = _name;
 	}
 
-	void show_tasks(sql::Statement* stmt, sql::Connection* con) {
-        string selectDataSQL = "SELECT * FROM TODO";
-        sql::ResultSet* res = stmt->executeQuery(selectDataSQL);
+    void mark_task_done(sql::Statement* stmt, sql::Connection* con);
 
 
-        // Pobranie iloœci danych z tablicy aby sprawdziæ czy baza jest pusta
-        string countSQL = "SELECT COUNT(*) AS count FROM TODO";
-        sql::Statement* stmt1 = con->createStatement();
-        sql::ResultSet* res1 = stmt1->executeQuery(countSQL);
-        res1->next();
-        int ID_count = res1->getInt("count");
-        int count = 0;
-
-        // Sprawdzanie czy baza jest pusta
-        if (ID_count == 0) {
-            cout << "No tasks available." << endl;
-            string resetSQL = "ALTER TABLE TODO AUTO_INCREMENT = 1";
-            stmt->execute(resetSQL);
-        }
-        else {
-            // Wyœwietlanie danych z bazy danych
-            while (res->next()) {
-                cout << "Task " << ++count << ": " << res->getString("task");
-                cout << " " << res->getString("done") << endl;
-            }
-        }
-	}
-	void add_task(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
-		string insertDataSQL =
-			"INSERT INTO TODO (task, done) VALUES "
-			"('" + name + "', " + (done ? "1" : "0") + ")";
-
-		stmt->execute(insertDataSQL);
-
-	};
+    // Dodawanie zadañ
+    void get_task_from_user(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con);
+    void deleteTask(sql::Statement* stmt, sql::Connection* con);
+    // Wyœwietlanie zadañ
+    void show_tasks(sql::Statement* stmt, sql::Connection* con);
+    void add_task(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con);
+    void compact_ID(sql::Statement* stmt);
 	friend void add_task(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con);
 };

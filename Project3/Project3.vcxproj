@@ -159,6 +159,12 @@
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="add_task.cpp" />
+    <ClCompile Include="compact_id.cpp" />
+    <ClCompile Include="delete_task.cpp" />
+    <ClCompile Include="get_task_from_user.cpp" />
+    <ClCompile Include="mark_task_done.cpp" />
+    <ClCompile Include="show_tasks.cpp" />
     <ClCompile Include="Źródło.cpp" />
   </ItemGroup>
   <ItemGroup>
