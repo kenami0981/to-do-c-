@@ -6,58 +6,23 @@
 #include <mysql_driver.h>
 #include "Task.h"
 using namespace std;
-void get_task_from_user(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con);
-void show_task(sql::Statement* stmt, sql::Connection* con);
-void mark_task_done(sql::Statement* stmt, sql::Connection* con);
-void deleteTask(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con);
+void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con);
 
 // Menu nawigacyjne 
-void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
 
-    int wybor;
-
-    // Zmienna do sprawdzania czy u¿ytkowanik wybra³ odpowiednie opcje dostêpne w menu
-    int wykonane=0;
-
-    // Pêtla do zapytania u¿ytkownika co chce wykonaæ 
-    do {
-        cout << "\nWhat would you like to do?\n1. Show me my task\n2. Add new task\n3. Mark task as done\n4. Delete task" << endl;
-        cin >> wybor;
-        if (wybor == 1) {
-            wykonane = 1;
-            system("cls");
-            show_task(stmt, con);
-
-        }
-        else if (wybor == 2) {
-            wykonane = 1;
-            system("cls");
-            get_task_from_user(res,stmt,con);
-        }
-        else if (wybor == 3) {
-            wykonane = 1;
-            system("cls");
-            mark_task_done(stmt, con);
-        }
-        else if (wybor == 4) {
-            wykonane = 1;
-            system("cls");
-            deleteTask(res, stmt, con);
-        }
-    } while (wykonane==0);
-
-}
 void mark_task_done(sql::Statement* stmt, sql::Connection* con) {
 
     // Ponowne zapytanie o pobranie danych (w razie gdyby u¿ytkowanik doda³ nowe zadanie)
+    Task t0("wyœwietl");
+    t0.show_tasks(stmt, con);
     string selectDataSQL = "SELECT * FROM TODO";
     sql::ResultSet* res = stmt->executeQuery(selectDataSQL);
 
-    string taskName;
+    string taskID;
     cout << "Enter your task you would like to mark as done: ";
     cin.ignore();
-    getline(std::cin, taskName);
-    std::string updateSQL = "UPDATE TODO SET done = 1 WHERE task = '" + taskName + "'";
+    getline(std::cin, taskID);
+    std::string updateSQL = "UPDATE TODO SET done = 1 WHERE id = '" + taskID + "'";
     stmt->execute(updateSQL);
 
     // Powrót do menu
@@ -65,31 +30,31 @@ void mark_task_done(sql::Statement* stmt, sql::Connection* con) {
 }
 // Wyœwietlanie zadañ
 void show_task(sql::Statement* stmt, sql::Connection* con) {
+    string selectDataSQL = "SELECT * FROM TODO";
+    sql::ResultSet* res = stmt->executeQuery(selectDataSQL);
 
+
+    // Pobranie iloœci danych z tablicy aby sprawdziæ czy baza jest pusta
+    string countSQL = "SELECT COUNT(*) AS count FROM TODO";
+    sql::Statement* stmt1 = con->createStatement();
+    sql::ResultSet* res1 = stmt1->executeQuery(countSQL);
+    res1->next();
+    int ID_count = res1->getInt("count");
+    int count = 0;
+
+    // Sprawdzanie czy baza jest pusta
+    if (ID_count == 0) {
+        cout << "No tasks available." << endl;
+    }
+    else {
+        // Wyœwietlanie danych z bazy danych
+        while (res->next()) {
+            cout << "Task " << ++count << ": " << res->getString("task");
+            cout << " " << res->getString("done") << endl;
+        }
+    }
         // Ponowne zapytanie o pobranie danych (w razie gdyby u¿ytkowanik doda³ nowe zadanie)
-        string selectDataSQL = "SELECT * FROM TODO";
-        sql::ResultSet* res = stmt->executeQuery(selectDataSQL);
-
-
-        // Pobranie iloœci danych z tablicy aby sprawdziæ czy baza jest pusta
-        string countSQL = "SELECT COUNT(*) AS count FROM TODO";
-        sql::Statement* stmt1 = con->createStatement();
-        sql::ResultSet* res1 = stmt1->executeQuery(countSQL);
-        res1->next();
-        int ID_count = res1->getInt("count");
-        int count = 0;
-
-        // Sprawdzanie czy baza jest pusta
-        if (ID_count == 0) {
-            cout << "No tasks available." << endl;
-        }
-        else {
-            // Wyœwietlanie danych z bazy danych
-            while (res->next()) {
-                cout << "Task " << ++count << ": " << res->getString("task");
-                cout << " " << res->getString("done") << endl;
-            }
-        }
+        
             
             
         
@@ -100,6 +65,8 @@ void show_task(sql::Statement* stmt, sql::Connection* con) {
 
 // Dodawanie zadañ
 void get_task_from_user(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
+    Task t2("test");
+    t2.show_tasks(stmt, con);
     string task_name;
     cout << "Enter your task: ";
     cin.ignore();
@@ -110,15 +77,66 @@ void get_task_from_user(sql::ResultSet* res, sql::Statement* stmt, sql::Connecti
     menu(res, stmt,con);
 }
 void deleteTask(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
-    string taskName;
+    Task t1("test");
+    t1.show_tasks(stmt, con);
+    //show_task(stmt,con);
+    string taskID;
     cout << "Enter your task you would like to mark as done: ";
     cin.ignore();
-    getline(std::cin, taskName);
-    std::string deleteSQL = "DELETE FROM TODO WHERE task = '" + taskName + "'";
+    cin >> taskID;
+    std::string deleteSQL = "DELETE FROM TODO WHERE id = '" + taskID + "'";
     stmt->execute(deleteSQL);
+    string selectSQL = "SELECT id FROM TODO ORDER BY id";
+
+
+    int newId = 1;
+    while (res->next()) {
+        int oldId = res->getInt("id");
+        if (oldId != newId) {
+            std::string updateSQL = "UPDATE TODO SET id = " + std::to_string(newId) + " WHERE id = " + std::to_string(oldId);
+            stmt->execute(updateSQL);
+        }
+        newId++;
+    }
+    string resetSQL = "ALTER TABLE TODO AUTO_INCREMENT = 1";
+    stmt->execute(resetSQL);
     menu(res, stmt, con);
 }
+void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
 
+    string choice;
+
+    // Zmienna do sprawdzania czy u¿ytkowanik wybra³ odpowiednie opcje dostêpne w menu
+    int wykonane = 0;
+
+    // Pêtla do zapytania u¿ytkownika co chce wykonaæ 
+    do {
+        cout << "\nWhat would you like to do?\n1. Show me my task\n2. Add new task\n3. Mark task as done\n4. Delete task" << endl;
+        cin >> choice;
+        if (choice == "1") {
+            wykonane = 1;
+            system("cls");
+            show_task(stmt, con);
+
+        }
+        else if (choice == "2") {
+            wykonane = 1;
+            system("cls");
+            get_task_from_user(res, stmt, con);
+        }
+        else if (choice == "3") {
+            wykonane = 1;
+            system("cls");
+            mark_task_done(stmt, con);
+        }
+        else if (choice == "4") {
+            wykonane = 1;
+            system("cls");
+            deleteTask(res, stmt, con);
+        }
+    } while (wykonane == 0);
+
+}
 int main() {
     // Próba po³¹czenia siê do bazy danych
     try {

@@ -10,9 +10,9 @@
   C:\Program Files\MySQL\mysql-connector-c++-8.0.11-windows-x86-64bit\lib64\ssleay32.dll
   4 File(s) copied
   Trwa generowanie kodu
-  2 of 139 functions ( 1.4%) were compiled, the rest were copied from previous compilation.
+  0 of 182 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
+    0 functions had inline decision re-evaluated but remain unchanged
   Zakończono generowanie kodu
   Project3.vcxproj -> C:\Users\HP\source\repos\to-do-c-\x64\Release\Project3.exe
   C:\Program Files\MySQL\mysql-connector-c++-8.0.11-windows-x86-64bit\lib64\libeay32.dll
