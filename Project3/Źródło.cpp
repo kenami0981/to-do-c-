@@ -12,9 +12,9 @@ void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con);
 
 void mark_task_done(sql::Statement* stmt, sql::Connection* con) {
 
-    // Ponowne zapytanie o pobranie danych (w razie gdyby u¿ytkowanik doda³ nowe zadanie)
     Task t0("wyœwietl");
     t0.show_tasks(stmt, con);
+    // Ponowne zapytanie o pobranie danych (w razie gdyby u¿ytkowanik doda³ nowe zadanie)
     string selectDataSQL = "SELECT * FROM TODO";
     sql::ResultSet* res = stmt->executeQuery(selectDataSQL);
 
@@ -29,36 +29,11 @@ void mark_task_done(sql::Statement* stmt, sql::Connection* con) {
     menu(res, stmt, con);
 }
 // Wyœwietlanie zadañ
-void show_task(sql::Statement* stmt, sql::Connection* con) {
+void show_task(sql::Statement* stmt, sql::Connection* con) {   
+    Task t0("wyœwietl");
+    t0.show_tasks(stmt, con);
     string selectDataSQL = "SELECT * FROM TODO";
     sql::ResultSet* res = stmt->executeQuery(selectDataSQL);
-
-
-    // Pobranie iloœci danych z tablicy aby sprawdziæ czy baza jest pusta
-    string countSQL = "SELECT COUNT(*) AS count FROM TODO";
-    sql::Statement* stmt1 = con->createStatement();
-    sql::ResultSet* res1 = stmt1->executeQuery(countSQL);
-    res1->next();
-    int ID_count = res1->getInt("count");
-    int count = 0;
-
-    // Sprawdzanie czy baza jest pusta
-    if (ID_count == 0) {
-        cout << "No tasks available." << endl;
-    }
-    else {
-        // Wyœwietlanie danych z bazy danych
-        while (res->next()) {
-            cout << "Task " << ++count << ": " << res->getString("task");
-            cout << " " << res->getString("done") << endl;
-        }
-    }
-        // Ponowne zapytanie o pobranie danych (w razie gdyby u¿ytkowanik doda³ nowe zadanie)
-        
-            
-            
-        
-        
     // Powrót do menu
     menu(res,stmt,con);
 }
@@ -76,7 +51,7 @@ void get_task_from_user(sql::ResultSet* res, sql::Statement* stmt, sql::Connecti
  
     menu(res, stmt,con);
 }
-void deleteTask(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
+void deleteTask(sql::Statement* stmt, sql::Connection* con) {
     Task t1("test");
     t1.show_tasks(stmt, con);
     //show_task(stmt,con);
@@ -87,7 +62,7 @@ void deleteTask(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con)
     std::string deleteSQL = "DELETE FROM TODO WHERE id = '" + taskID + "'";
     stmt->execute(deleteSQL);
     string selectSQL = "SELECT id FROM TODO ORDER BY id";
-
+    sql::ResultSet* res = stmt->executeQuery(selectSQL);
 
     int newId = 1;
     while (res->next()) {
@@ -98,8 +73,7 @@ void deleteTask(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con)
         }
         newId++;
     }
-    string resetSQL = "ALTER TABLE TODO AUTO_INCREMENT = 1";
-    stmt->execute(resetSQL);
+    
     menu(res, stmt, con);
 }
 void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
@@ -132,7 +106,7 @@ void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
         else if (choice == "4") {
             wykonane = 1;
             system("cls");
-            deleteTask(res, stmt, con);
+            deleteTask(stmt, con);
         }
     } while (wykonane == 0);
 
