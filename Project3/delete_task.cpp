@@ -1,5 +1,5 @@
 #include "Task.h"
- 
+ // Usuwanie taskow z bazy danych
 void Task::deleteTask(sql::Statement* stmt, sql::Connection* con) {
     Task t0("wyœwietlanie");
     t0.show_tasks(stmt, con);
@@ -12,7 +12,7 @@ void Task::deleteTask(sql::Statement* stmt, sql::Connection* con) {
     cin.ignore();
     cin >> taskID;
     
-    
+    //Sprawdzanie czy uzytkownik nie wpisa³ wiekszego ID ni¿ istnieje
     if (res->next()) {
         if (res->getInt("max_id") < stoi(taskID)) {
             cout << "   Task with ID " << taskID << " does not exist." << endl;

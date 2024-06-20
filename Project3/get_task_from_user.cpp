@@ -1,4 +1,5 @@
 #include "Task.h"
+//Pobieranie zadania od uzytwkonika
 void Task::get_task_from_user(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
     string task_name;
     cout << endl;

@@ -108,7 +108,7 @@ int main() {
         delete con;
     }
     catch (sql::SQLException& e) {
-        std::cerr << "SQL Error: " << e.what() << std::endl;
+        cerr << "SQL Error: " << e.what() << endl;
     }
     
     return 0;
