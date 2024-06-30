@@ -71,12 +71,15 @@ void menu(sql::ResultSet* res, sql::Statement* stmt, sql::Connection* con) {
 }
 int main() {
     // Próba po³¹czenia siê do bazy danych
+    string password;
+    cout << "Enter password to database : ";
+    cin >> password;
     try {
         sql::mysql::MySQL_Driver* driver;
         sql::Connection* con;
 
         driver = sql::mysql::get_mysql_driver_instance();
-        con = driver->connect("tcp://localhost:3306", "root", "root");
+        con = driver->connect("tcp://localhost:3306", "root", password);
 
         sql::Statement* stmt = con->createStatement();
 
