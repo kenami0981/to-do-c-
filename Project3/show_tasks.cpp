@@ -25,20 +25,20 @@ void Task::show_tasks(sql::Statement* stmt, sql::Connection* con) {
     else {
         // Wyœwietlanie danych z bazy danych
         cout << endl;
-        cout << "   +------+--------------------------------------------------------------------+------+" << endl;
-        cout << "   |  ID  | Task                                                               | Done |" << endl;
-        cout << "   +------+--------------------------------------------------------------------+------+" << endl;
+        cout << "   +------+--------------------------------------------------------------------+------+--------------+" << endl;
+        cout << "   |  ID  | Task                                                               | Done |   Deadline   |" << endl;
+        cout << "   +------+--------------------------------------------------------------------+------+--------------+" << endl;
         while (res->next()) {
             string task = res->getString("task");
             if (task.length() > 60) {
                 task = task.substr(0, 57) + "...";
-                cout << "   | " << setw(4) << right << res->getInt("id") << " | " << left << setw(66) << task << " | " << setw(4) << (res->getInt("done") ? "Yes" : "No") << " |" << endl;
+                cout << "   | " << setw(4) << right << res->getInt("id") << " | " << left << setw(66) << task << " | " << setw(4) << (res->getInt("done") ? "Yes" : "No") << " |" << setw(13) << res->getString("deadline") << " |" << endl;
             }
             else {
-            cout << "   | " << setw(4) <<right << res->getInt("id") << " | " << left << setw(66) << res->getString("task") << " | " <<setw(4)<< (res->getInt("done") ? "Yes" : "No") << " |" << endl;
+            cout << "   | " << setw(4) <<right << res->getInt("id") << " | " << left << setw(66) << res->getString("task") << " | " <<setw(4)<< (res->getInt("done") ? "Yes" : "No") << " |" << setw(13) << res->getString("deadline") << " |" << endl;
             }
         }
-        cout << "   +------+--------------------------------------------------------------------+------+" << endl;
+        cout << "   +------+---------------------------------------------------------------------------+--------------+" << endl;
     }
     
 }

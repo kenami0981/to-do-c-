@@ -13,11 +13,17 @@ class Task {
 
 	string name;
 	bool done = false;
+    string deadline;
 
 public:
-	Task(string _name) {
+	Task(string _name, string _deadline) {
 		name = _name;
+        deadline = _deadline;
 	}
+    Task(string _name) {
+        name = _name;
+        
+    }
 
     void mark_task_done(sql::Statement* stmt, sql::Connection* con);
 

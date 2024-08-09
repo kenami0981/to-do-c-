@@ -94,7 +94,8 @@ int main() {
             "CREATE TABLE IF NOT EXISTS TODO ("
             "id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
             "task VARCHAR(255) NOT NULL,"
-            "done BOOL NOT NULL"
+            "done BOOL NOT NULL,"
+            "deadline VARCHAR(255)"
             ")";
 
         stmt->execute(createTableSQL);
